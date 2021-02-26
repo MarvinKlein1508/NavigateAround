@@ -1,0 +1,70 @@
+﻿@page "/Customer/{CustomerId:int}"
+@inject CustomerService customerService
+@inject AlertService alertService
+@inject NavigationManager navigationManager
+
+@if (Mode is EditMode.Create)
+{
+    <h2>Create new customer</h2>
+}
+else
+{
+    <h2>Edit customer @CustomerId</h2>
+}
+
+@if (customer is not null)
+{
+    <EditForm Model="customer">
+        <div class="form-group">
+            <label>Name</label>
+            <InputText @bind-Value="customer.CustomerName" class="form-control" />
+        </div>
+    </EditForm>
+}
+
+
+@code {
+    [Parameter] public int CustomerId { get; set; }
+
+    public EditMode Mode { get; set; } = EditMode.Create;
+    private Customer? customer = new Customer();
+    private bool _stopRendering;
+    protected override async Task OnParametersSetAsync()
+    {
+        if (CustomerId > 0)
+        {
+            customer = await customerService.GetCustomerAsync(CustomerId);
+            if (customer is not null)
+            {
+                // More stuff gets awaited here
+                await Task.Delay(100);
+
+                // More variables of the component are changed after the awaited stuff
+
+                Mode = EditMode.Edit;
+            }
+            else
+            {
+                _stopRendering = true;
+                alertService.AddAlert(new Alert
+                {
+                    Message = $"Customer {CustomerId} could not be found.",
+                    Type = "alert alert-danger"
+                });
+
+                navigationManager.NavigateTo("/");
+            }
+        }
+
+        // When no CustomerId is set, we are navigating the page in Create mode
+
+    }
+
+    protected override bool ShouldRender()
+    {
+        if (_stopRendering)
+            return false;
+        else
+            return base.ShouldRender();
+    }
+}

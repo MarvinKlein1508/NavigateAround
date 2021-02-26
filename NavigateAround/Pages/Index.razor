@@ -1,0 +1,46 @@
+﻿@page "/"
+@inject AlertService alertService
+@inject NavigationManager navigationManager
+
+<p>
+    Put a debug point in OnInitialized in Index.razor and one in OnParametersSetAsync in EditCustomer.razor
+</p>
+
+@foreach (var alert in _alerts)
+{
+    <div class="@alert.Type">
+        @alert.Message
+    </div>
+}
+<h3>Valid customer</h3>
+<a href="/Customer/10000">Customer 10000 (Direkt Navigation)</a><br />
+<button type="button" @onclick="NavigateToCustomer10000">Customer 10000 (NavigationManager)</button><br />
+<a href="/Customer/10000" target="_blank">Customer 10000 (New Tab)</a><br />
+
+<h3>Invalid customer</h3>
+<a href="/Customer/70000">Customer 70000 (Direkt Navigation)</a><br />
+<button type="button" @onclick="NavigateToCustomer70000">Customer 70000 (NavigationManager)</button><br />
+<a href="/Customer/70000" target="_blank">Customer 70000 (New Tab)</a><br />
+
+@code {
+
+    private List<Alert> _alerts = new List<Alert>();
+
+    protected override void OnInitialized()
+    {
+        _alerts = alertService.GetAlerts();
+    }
+
+    private void NavigateToCustomer10000()
+    {
+        navigationManager.NavigateTo("/Customer/10000");
+    }
+
+    private void NavigateToCustomer70000()
+    {
+        navigationManager.NavigateTo("/Customer/70000");
+    }
+}
+
+
+
